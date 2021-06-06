@@ -30,9 +30,17 @@ async function handleLoginLogout(authClient) {
 async function handleAuthenticated(authClient) {
   document.getElementById("clickMeBtn").innerText = "Logout"
 
+  // TODO why do we need to manually construct an IDL and can't just use the identity_example_idl?!
+  // We either have an Agent with an anonymous identity (not authenticated),
+  // or already authenticated agent, or parsing the redirect from window.location.
+  const manual_idl = ({ IDL }) =>
+    IDL.Service({
+      greet: IDL.Func([], [IDL.Principal], ['query']),
+    });
+
   const identity = await authClient.getIdentity();
   const agent = new HttpAgent({ identity });
-  const identity_example = Actor.createActor(identity_example_idl, {
+  const identity_example = Actor.createActor(manual_idl /* identity_example_idl */, {
     agent,
     canisterId: identity_example_canister_id,
   });
